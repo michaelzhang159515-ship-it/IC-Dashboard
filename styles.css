@@ -48,14 +48,26 @@ body {
 }
 
 .hero {
-  padding: 24px 28px 8px;
-  text-align: center;
+  padding: 36px 28px 10px;
+  text-align: left;
   display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 46vh;
+  justify-content: space-between;
+  align-items: flex-start;
+  min-height: auto;
 }
-.hero-inner { width: 100%; }
+.hero-inner { width: auto; }
+.hero-horse {
+  width: min(34vw, 420px);
+  opacity: 0.5;
+  filter: drop-shadow(0 0 10px rgba(255, 195, 85, 0.25));
+}
+.hero-horse path {
+  fill: none;
+  stroke: #ffd37d;
+  stroke-width: 14;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
 .year {
   margin: 0;
   font-size: clamp(54px, 9vw, 96px);
@@ -118,7 +130,7 @@ h1 {
 .admin-wrap {
   max-width: 1400px;
   margin: 0 auto;
-  padding: 4px 20px 80px;
+  padding: 16px 20px 80px;
   display: grid;
   gap: 16px;
 }
@@ -237,28 +249,28 @@ tfoot td {
 
 .split-grid {
   display: grid;
-  grid-template-columns: 1fr 420px;
+  grid-template-columns: 1fr 470px;
   gap: 14px;
 }
 .chart-box {
-  position: relative;
   border: 1px solid rgba(255,255,255,0.25);
   border-radius: 14px;
   padding: 8px;
   background: rgba(0,0,0,0.11);
-  min-height: 450px;
+  display: grid;
+  grid-template-rows: auto auto 1fr auto;
 }
 .chart-box h3 { margin: 4px 0 8px; text-align: center; font-size: 21px; }
-#marketPie { width: 100%; height: auto; display: block; max-width: 360px; margin: 72px auto 0; }
+#marketPie { width: 100%; height: auto; display: block; max-width: 450px; margin: 0 auto; }
 .pie-legend {
-  position: absolute;
-  left: 14px;
-  top: 54px;
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 7px;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin-top: 8px;
+  align-self: end;
+  justify-content: start;
   font-size: 13px;
-  max-width: 170px;
+  max-width: none;
 }
 .legend-item { display: flex; align-items: center; gap: 6px; }
 .legend-dot { width: 12px; height: 12px; border-radius: 50%; }
@@ -361,7 +373,8 @@ button:hover { background: rgba(255,255,255,0.21); }
 @media (max-width: 760px) {
   body { font-size: 18px; }
   .dashboard-wrap, .admin-wrap { padding: 8px 8px 96px; }
-  .hero { padding: 22px 10px 8px; min-height: 42vh; }
+  .hero { padding: 24px 12px 8px; min-height: auto; gap: 8px; }
+  .hero-horse { width: min(38vw, 180px); opacity: 0.42; }
   .strategy {
     font-size: 28px;
     width: 100%;
@@ -388,15 +401,10 @@ button:hover { background: rgba(255,255,255,0.21); }
   th { font-size: 17px; }
   .rank-badge { font-size: 15px; }
   .chart-box h3 { font-size: 23px; }
-  .chart-box { min-height: 520px; }
-  #marketPie { max-width: 330px; margin-top: 170px; }
+  #marketPie { max-width: 340px; }
   .pie-legend {
-    top: 54px;
-    left: 12px;
-    right: 12px;
-    max-width: none;
-    grid-template-columns: 1fr 1fr;
-    font-size: 13px;
+    grid-template-columns: 1fr;
+    font-size: 14px;
   }
   .report-date { font-size: 13px; bottom: 56px; }
   .bottom-actions {
