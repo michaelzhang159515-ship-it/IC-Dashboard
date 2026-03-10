@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>教务数据填报</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body class="admin-page">
+  <main class="admin-wrap">
+    <section class="card login-card" id="loginCard">
+      <h1>教务数据填报入口</h1>
+      <p>仅支持各校区教务更新本校区数据（按日维护）。</p>
+      <label>校区
+        <select id="campusSelect"></select>
+      </label>
+      <label>密码
+        <input id="passwordInput" type="password" placeholder="请输入校区教务密码" />
+      </label>
+      <button id="loginBtn">登录</button>
+      <a href="./index.html" class="back-link">返回实时报告</a>
+      <p class="hint">默认演示密码格式：校区全拼简写 + 2026，例如：gz2026、nc2026。</p>
+      <p id="loginMsg" class="msg"></p>
+    </section>
+
+    <section class="card editor-card hidden" id="editorCard">
+      <div class="editor-head">
+        <h2 id="editorTitle"></h2>
+        <div>
+          <button id="saveAllBtn" class="ghost-btn">保存全部</button>
+          <button id="logoutBtn" class="ghost-btn">退出</button>
+        </div>
+      </div>
+      <p class="hint">你只能编辑当前校区的数据。修改后点击“保存全部”，主页将自动读取最新数据。</p>
+      <div id="editorSections"></div>
+    </section>
+  </main>
+
+  <script src="./data.js"></script>
+  <script src="./admin.js"></script>
+</body>
+</html>

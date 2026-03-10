@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>2026爱习集团战果实时报告</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body class="dashboard-page">
+  <div class="bg-orb orb-1"></div>
+  <div class="bg-orb orb-2"></div>
+  <svg class="horse-bg" viewBox="0 0 900 520" aria-hidden="true">
+    <path d="M124 313 C112 246, 168 178, 230 181 C264 140, 322 123, 381 137 C448 125, 517 152, 556 210 C620 204, 669 238, 684 301 C697 358, 666 402, 615 416 C584 451, 532 469, 484 459 C431 483, 368 483, 319 461 C255 472, 196 444, 166 398 C136 385, 118 350, 124 313 Z"/>
+    <path d="M538 208 C585 197, 624 153, 645 116 C669 75, 706 55, 751 52"/>
+  </svg>
+
+  <header class="hero">
+    <div>
+      <p class="year">2026</p>
+      <h1>爱习集团战果实时报告</h1>
+      <p class="strategy">战略：三年二十校</p>
+    </div>
+    <a class="admin-entry" href="./admin.html" title="教务填报入口">教务入口</a>
+  </header>
+
+  <main class="dashboard-wrap">
+    <section class="card podium-card">
+      <h2>校区前三舞台</h2>
+      <div id="podium" class="podium"></div>
+    </section>
+
+    <section class="card">
+      <h2>校区排名</h2>
+      <div id="campusTable"></div>
+    </section>
+
+    <section class="card">
+      <h2>市场部排名</h2>
+      <div class="split-grid">
+        <div id="marketTable"></div>
+        <div class="chart-box">
+          <h3>全款人数占比</h3>
+          <canvas id="marketPie" width="360" height="360"></canvas>
+          <div id="pieLegend" class="pie-legend"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>教练排名</h2>
+      <div id="coachTable"></div>
+    </section>
+
+    <section class="card">
+      <h2>主管排名</h2>
+      <div id="supervisorTable"></div>
+    </section>
+
+    <section class="card">
+      <h2>教学部排名</h2>
+      <div id="teachingTable"></div>
+    </section>
+
+    <section class="card">
+      <h2>教师排名</h2>
+      <div id="teacherTable"></div>
+      <h3 class="sub-title">教师续课「赢在职场」</h3>
+      <div id="teacherCourseTable"></div>
+    </section>
+  </main>
+
+  <footer class="report-date" id="reportDate"></footer>
+
+  <script src="./data.js"></script>
+  <script src="./dashboard.js"></script>
+</body>
+</html>
