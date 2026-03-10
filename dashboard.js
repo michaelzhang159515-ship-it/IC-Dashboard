@@ -1,7 +1,15 @@
 (function () {
-  const { getData, toCurrency, toPercent, toDateLabel } = window.AIXI;
+  const {
+    fetchDashboardData,
+    toCurrency,
+    toPercent,
+    toDateLabel,
+    VIEW_PASSWORDS,
+    VIEW_ROLE_LABELS
+  } = window.AIXI;
 
   const COLORS = ["#ffcf60", "#ff7f66", "#ff5a3a", "#ffb36e", "#ffdca1", "#fce69e", "#f7a76d", "#f06e48"];
+  const ROLE_SESSION_KEY = "aixi_dashboard_view_role";
 
   function sum(rows, key) {
     return rows.reduce((acc, row) => acc + (Number(row[key]) || 0), 0);
@@ -10,6 +18,11 @@
   function withRank(rows, sortFn) {
     const sorted = [...rows].sort(sortFn);
     return sorted.map((row, i) => ({ ...row, rank: i + 1 }));
+  }
+
+  function titleWithoutYear(title) {
+    if (!title) return "爱习集团战果实时报告";
+    return String(title).replace(/^2026\s*/, "");
   }
 
   function renderTable(containerId, columns, rows, options) {
@@ -40,7 +53,8 @@
           v = col.formatter(v, row);
         }
         if (col.key === "rank") {
-          td.innerHTML = '<span class="rank-badge">#' + v + "</span>";
+          const rankClass = v <= 3 ? " r" + v : "";
+          td.innerHTML = '<span class="rank-badge' + rankClass + '">第' + v + "名</span>";
         } else {
           td.textContent = v;
         }
@@ -86,14 +100,17 @@
         return order[a.rank] - order[b.rank];
       });
 
+    const rankText = { 1: "冠军", 2: "亚军", 3: "季军" };
+    const icons = { 1: "👑", 2: "✦", 3: "✦" };
+
     podium.innerHTML = "";
     top3.forEach((item) => {
       const div = document.createElement("div");
       div.className = "podium-item r" + item.rank;
       div.innerHTML =
-        '<div class="rank">第' + item.rank + '名</div>' +
-        '<div class="name">' + item.campus + "</div>" +
-        '<div class="value">净收 ' + toCurrency(item.net) + "</div>";
+        '<div class="podium-title">' + rankText[item.rank] + "</div>" +
+        '<div class="podium-name">' + item.campus + "</div>" +
+        '<div class="stage">' + icons[item.rank] + "</div>";
       podium.appendChild(div);
     });
   }
@@ -151,10 +168,83 @@
     });
   }
 
-  function render() {
-    const data = getData();
-    document.title = data.meta.title || "2026爱习集团战果实时报告";
-    document.querySelector("h1").textContent = data.meta.title || "2026爱习集团战果实时报告";
+  function applyRolePermission(role) {
+    const roleBadge = document.getElementById("roleBadge");
+    if (roleBadge) {
+      roleBadge.textContent = "身份：" + (VIEW_ROLE_LABELS[role] || "未验证");
+    }
+
+    document.querySelectorAll("[data-scope]").forEach((sec) => {
+      const scope = sec.getAttribute("data-scope");
+      const canView = role === "partner" ? true : scope === "coach";
+      sec.classList.toggle("hidden", !canView);
+    });
+  }
+
+  function getSavedRole() {
+    try {
+      const raw = localStorage.getItem(ROLE_SESSION_KEY);
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      if (!parsed || !parsed.role || !parsed.password) return null;
+      if (!VIEW_PASSWORDS[parsed.role]) return null;
+      if (VIEW_PASSWORDS[parsed.role] !== parsed.password) return null;
+      return parsed;
+    } catch (err) {
+      return null;
+    }
+  }
+
+  function initRoleGate() {
+    const roleModal = document.getElementById("roleModal");
+    const roleEntry = document.getElementById("roleEntry");
+    const roleSelect = document.getElementById("roleSelect");
+    const rolePassword = document.getElementById("rolePassword");
+    const roleConfirm = document.getElementById("roleConfirm");
+    const roleMsg = document.getElementById("roleMsg");
+
+    function openModal() {
+      roleModal.classList.remove("hidden");
+      roleMsg.textContent = "";
+      rolePassword.value = "";
+    }
+
+    function closeModal() {
+      roleModal.classList.add("hidden");
+    }
+
+    roleEntry.addEventListener("click", openModal);
+
+    roleConfirm.addEventListener("click", () => {
+      const role = roleSelect.value;
+      const password = (rolePassword.value || "").trim();
+      if (!password) {
+        roleMsg.textContent = "请输入访问密码。";
+        return;
+      }
+      if (password !== VIEW_PASSWORDS[role]) {
+        roleMsg.textContent = "密码错误。";
+        return;
+      }
+      localStorage.setItem(ROLE_SESSION_KEY, JSON.stringify({ role: role, password: password }));
+      applyRolePermission(role);
+      closeModal();
+    });
+
+    const saved = getSavedRole();
+    if (!saved) {
+      applyRolePermission("coach");
+      openModal();
+    } else {
+      applyRolePermission(saved.role);
+      closeModal();
+    }
+  }
+
+  function renderWithData(data) {
+    const cleanTitle = titleWithoutYear(data.meta.title || "爱习集团战果实时报告");
+    document.title = "2026" + cleanTitle;
+    document.querySelector("h1").textContent = cleanTitle;
     document.querySelector(".strategy").textContent = "战略：" + (data.meta.strategy || "三年二十校");
     document.getElementById("reportDate").textContent = toDateLabel(data.meta.lastUpdated);
 
@@ -324,6 +414,14 @@
     );
   }
 
-  window.addEventListener("storage", render);
+  async function render() {
+    const result = await fetchDashboardData();
+    renderWithData(result.data);
+    const saved = getSavedRole();
+    applyRolePermission(saved ? saved.role : "coach");
+  }
+
+  initRoleGate();
   render();
+  setInterval(render, 8000);
 })();

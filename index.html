@@ -18,23 +18,23 @@
     <div>
       <p class="year">2026</p>
       <h1>爱习集团战果实时报告</h1>
-      <p class="strategy">战略：三年二十校</p>
+      <p class="strategy">三年二十校</p>
+      <p class="role-badge" id="roleBadge">身份：未验证</p>
     </div>
-    <a class="admin-entry" href="./admin.html" title="教务填报入口">教务入口</a>
   </header>
 
   <main class="dashboard-wrap">
-    <section class="card podium-card">
-      <h2>校区前三舞台</h2>
+    <section class="card podium-card" id="sectionPodium" data-scope="all">
+      <h2>荣耀王者校区殿堂</h2>
       <div id="podium" class="podium"></div>
     </section>
 
-    <section class="card">
+    <section class="card" id="sectionCampus" data-scope="all">
       <h2>校区排名</h2>
       <div id="campusTable"></div>
     </section>
 
-    <section class="card">
+    <section class="card" id="sectionMarket" data-scope="coach">
       <h2>市场部排名</h2>
       <div class="split-grid">
         <div id="marketTable"></div>
@@ -46,22 +46,22 @@
       </div>
     </section>
 
-    <section class="card">
+    <section class="card" id="sectionCoach" data-scope="coach">
       <h2>教练排名</h2>
       <div id="coachTable"></div>
     </section>
 
-    <section class="card">
+    <section class="card" id="sectionSupervisor" data-scope="coach">
       <h2>主管排名</h2>
       <div id="supervisorTable"></div>
     </section>
 
-    <section class="card">
+    <section class="card" id="sectionTeaching" data-scope="all">
       <h2>教学部排名</h2>
       <div id="teachingTable"></div>
     </section>
 
-    <section class="card">
+    <section class="card" id="sectionTeacher" data-scope="all">
       <h2>教师排名</h2>
       <div id="teacherTable"></div>
       <h3 class="sub-title">教师续课「赢在职场」</h3>
@@ -70,6 +70,29 @@
   </main>
 
   <footer class="report-date" id="reportDate"></footer>
+
+  <div class="bottom-actions">
+    <button class="role-entry" id="roleEntry" type="button">切换身份</button>
+    <a class="admin-entry" href="./admin.html" title="教务填报入口">教务入口</a>
+  </div>
+
+  <div class="role-modal hidden" id="roleModal">
+    <div class="role-panel">
+      <h3>岗位身份验证</h3>
+      <p>合伙人可查看全部数据；市场部教练仅查看市场/教练/主管板块。</p>
+      <label>岗位
+        <select id="roleSelect">
+          <option value="partner">合伙人（校长/市场总监/教学总监）</option>
+          <option value="coach">市场部教练</option>
+        </select>
+      </label>
+      <label>访问密码
+        <input id="rolePassword" type="password" placeholder="请输入岗位访问密码" />
+      </label>
+      <button type="button" id="roleConfirm">进入仪表盘</button>
+      <p class="msg" id="roleMsg"></p>
+    </div>
+  </div>
 
   <script src="./data.js"></script>
   <script src="./dashboard.js"></script>

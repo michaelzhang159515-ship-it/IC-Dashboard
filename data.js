@@ -11,6 +11,9 @@
     "少儿南昌校区"
   ];
 
+  const SUPABASE_URL = "https://vmlgntrxmngjnfdzdtfu.supabase.co";
+  const SUPABASE_ANON_KEY = "sb_publishable_0xR40-tUPmIoGKd5RdtQ9Q_cwtcCrFn";
+
   const DEFAULT_PASSWORDS = {
     "赣州校区": "gz2026",
     "南昌校区": "nc2026",
@@ -22,9 +25,19 @@
     "少儿南昌校区": "senc2026"
   };
 
+  const VIEW_ROLE_LABELS = {
+    partner: "合伙人",
+    coach: "市场部教练"
+  };
+
+  const VIEW_PASSWORDS = {
+    partner: "partner2026",
+    coach: "coach2026"
+  };
+
   const BASE_DATA = {
     meta: {
-      lastUpdated: "2026-03-09",
+      lastUpdated: "2026-03-10",
       strategy: "三年二十校",
       title: "2026爱习集团战果实时报告"
     },
@@ -127,7 +140,7 @@
     return data;
   }
 
-  function getData() {
+  function getLocalData() {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (!raw) {
@@ -141,8 +154,69 @@
     }
   }
 
-  function saveData(data) {
+  function saveLocalData(data) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  }
+
+  async function supabaseRpc(functionName, payload) {
+    const res = await fetch(SUPABASE_URL + "/rest/v1/rpc/" + functionName, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: "Bearer " + SUPABASE_ANON_KEY
+      },
+      body: JSON.stringify(payload || {})
+    });
+
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error("RPC " + functionName + " failed: " + text);
+    }
+
+    const text = await res.text();
+    if (!text) return null;
+    try {
+      return JSON.parse(text);
+    } catch (err) {
+      return text;
+    }
+  }
+
+  async function fetchDashboardData() {
+    try {
+      const data = await supabaseRpc("get_dashboard_data", {});
+      if (!data || typeof data !== "object") {
+        throw new Error("empty data");
+      }
+      const migrated = migrateData(data);
+      saveLocalData(migrated);
+      return { data: migrated, source: "supabase" };
+    } catch (err) {
+      const local = getLocalData();
+      return { data: local, source: "local", error: String(err.message || err) };
+    }
+  }
+
+  async function verifyCampusLogin(campus, password) {
+    try {
+      const res = await supabaseRpc("verify_campus_login", {
+        p_campus: campus,
+        p_password: password
+      });
+      return !!res;
+    } catch (err) {
+      return password === DEFAULT_PASSWORDS[campus];
+    }
+  }
+
+  async function saveCampusPayload(campus, password, payload) {
+    const res = await supabaseRpc("save_campus_payload", {
+      p_campus: campus,
+      p_password: password,
+      p_payload: payload
+    });
+    return !!res;
   }
 
   function toCurrency(n) {
@@ -158,7 +232,7 @@
   function toDateLabel(iso) {
     const d = new Date(iso + "T00:00:00");
     if (Number.isNaN(d.getTime())) {
-      return "截至2026年03月09日";
+      return "截至2026年03月10日";
     }
     const y = d.getFullYear();
     const m = String(d.getMonth() + 1).padStart(2, "0");
@@ -170,9 +244,16 @@
     STORAGE_KEY,
     CAMPUSES,
     DEFAULT_PASSWORDS,
+    VIEW_ROLE_LABELS,
+    VIEW_PASSWORDS,
     BASE_DATA,
-    getData,
-    saveData,
+    SUPABASE_URL,
+    SUPABASE_ANON_KEY,
+    getLocalData,
+    saveLocalData,
+    fetchDashboardData,
+    verifyCampusLogin,
+    saveCampusPayload,
     toCurrency,
     toPercent,
     toDateLabel,

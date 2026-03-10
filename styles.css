@@ -15,7 +15,7 @@ body {
   margin: 0;
   font-family: "PingFang SC", "Microsoft Yahei", sans-serif;
   color: var(--text);
-  background: radial-gradient(circle at 20% 15%, #ff8f00 0%, rgba(255, 143, 0, 0) 26%),
+  background: radial-gradient(circle at 20% 15%, #ff8f00 0%, rgba(255, 143, 0, 0) 28%),
     linear-gradient(140deg, var(--bg1), var(--bg2), var(--bg3));
   min-height: 100vh;
 }
@@ -32,64 +32,87 @@ body {
 
 .horse-bg {
   position: fixed;
-  left: -60px;
-  top: 10px;
-  width: min(68vw, 760px);
-  opacity: 0.11;
+  left: -70px;
+  top: -10px;
+  width: min(78vw, 900px);
+  opacity: 0.25;
   z-index: -2;
+  filter: drop-shadow(0 0 14px rgba(255, 181, 75, 0.35));
 }
 .horse-bg path {
   fill: none;
-  stroke: #ffce73;
-  stroke-width: 20;
+  stroke: #ffd77c;
+  stroke-width: 26;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
 
 .hero {
-  padding: 36px 28px 10px;
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 12px;
+  padding: 32px 28px 12px;
 }
 .year {
   margin: 0;
-  font-size: clamp(42px, 8vw, 82px);
+  font-size: clamp(54px, 9vw, 96px);
   line-height: 0.9;
   font-weight: 900;
   color: #fff;
-  text-shadow: 0 5px 0 #cd1200;
+  text-shadow: 0 6px 0 #cd1200;
 }
 h1 {
-  margin: 10px 0 8px;
-  font-size: clamp(24px, 4.8vw, 48px);
-  line-height: 1.2;
+  margin: 10px 0 10px;
+  font-size: clamp(28px, 4.8vw, 52px);
+  line-height: 1.15;
 }
 .strategy {
+  display: inline-block;
   margin: 0;
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--accent);
+  font-size: clamp(22px, 3.6vw, 34px);
+  font-weight: 900;
+  letter-spacing: 2px;
+  color: #fff;
+  background: linear-gradient(90deg, #cb0600, #ff8f00, #cb0600);
+  border: 2px solid rgba(255, 214, 126, 0.9);
+  border-radius: 999px;
+  padding: 8px 20px;
+  box-shadow: 0 0 20px rgba(255, 186, 89, 0.35);
+}
+.role-badge {
+  margin: 10px 0 0;
+  font-size: 14px;
+  color: #ffe5c3;
 }
 
+.bottom-actions {
+  position: fixed;
+  right: 14px;
+  bottom: 10px;
+  display: flex;
+  gap: 8px;
+  z-index: 20;
+}
+
+.role-entry,
 .admin-entry {
-  margin-top: 6px;
   font-size: 12px;
-  color: rgba(255, 255, 255, 0.55);
-  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: rgba(255, 255, 255, 0.86);
+  border: 1px solid rgba(255, 255, 255, 0.34);
   border-radius: 999px;
   text-decoration: none;
-  padding: 6px 10px;
+  padding: 7px 11px;
+  background: rgba(0, 0, 0, 0.18);
   transition: all 0.25s;
 }
-.admin-entry:hover { color: #fff; border-color: rgba(255,255,255,.62); }
+.role-entry:hover,
+.admin-entry:hover {
+  color: #fff;
+  border-color: rgba(255,255,255,.65);
+}
 
 .dashboard-wrap,
 .admin-wrap {
   max-width: 1400px;
   margin: 0 auto;
-  padding: 16px 20px 70px;
+  padding: 16px 20px 80px;
   display: grid;
   gap: 16px;
 }
@@ -102,42 +125,80 @@ h1 {
   padding: 14px;
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.16);
 }
-.card h2 { margin: 0 0 10px; }
-.sub-title { margin: 14px 0 8px; color: var(--accent); }
+.card h2 {
+  margin: 0 0 12px;
+  font-size: clamp(22px, 3vw, 34px);
+  letter-spacing: 1px;
+}
+.sub-title {
+  margin: 14px 0 8px;
+  color: var(--accent);
+  font-size: 22px;
+}
 
 .podium {
   display: grid;
   grid-template-columns: repeat(3, minmax(100px, 1fr));
-  gap: 10px;
+  gap: 12px;
   align-items: end;
 }
 .podium-item {
+  position: relative;
   text-align: center;
-  border-radius: 14px 14px 8px 8px;
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  background: rgba(255, 255, 255, 0.1);
-  padding: 10px 8px;
+  padding-top: 10px;
 }
-.podium-item .rank { font-size: 24px; font-weight: 900; }
-.podium-item .name { font-size: 15px; font-weight: 700; }
-.podium-item .value { font-size: 13px; color: var(--muted); }
-.podium-item.r1 { min-height: 148px; border-color: #ffd862; background: rgba(255, 216, 98, 0.16); }
-.podium-item.r2 { min-height: 122px; }
-.podium-item.r3 { min-height: 108px; }
+.podium-title {
+  font-size: 21px;
+  font-weight: 900;
+  margin-bottom: 2px;
+}
+.podium-name {
+  font-size: 18px;
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+.stage {
+  border-radius: 14px 14px 6px 6px;
+  border: 1px solid rgba(255, 255, 255, 0.42);
+  box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.18);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  font-size: 28px;
+  padding-bottom: 8px;
+}
+.podium-item.r1 .stage {
+  min-height: 172px;
+  background: linear-gradient(180deg, rgba(255, 226, 125, 0.56), rgba(255, 178, 37, 0.36));
+  border-color: #ffd862;
+}
+.podium-item.r2 .stage {
+  min-height: 142px;
+  background: linear-gradient(180deg, rgba(253, 246, 236, 0.48), rgba(196, 196, 196, 0.28));
+}
+.podium-item.r3 .stage {
+  min-height: 126px;
+  background: linear-gradient(180deg, rgba(255, 193, 144, 0.52), rgba(185, 98, 32, 0.3));
+}
 
 .table-wrap { overflow-x: auto; }
 table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 780px;
+  min-width: 880px;
 }
 th, td {
   border: 1px solid rgba(255,255,255,0.22);
-  padding: 8px 9px;
+  padding: 10px 10px;
   text-align: center;
   white-space: nowrap;
+  font-size: 15px;
 }
-th { background: rgba(255, 170, 120, 0.2); color: #fff; }
+th {
+  background: rgba(255, 170, 120, 0.2);
+  color: #fff;
+  font-size: 16px;
+}
 tbody tr:nth-child(odd) { background: rgba(255,255,255,0.04); }
 tfoot td {
   font-weight: 800;
@@ -145,9 +206,17 @@ tfoot td {
   color: #fff6da;
 }
 .rank-badge {
-  font-weight: 800;
+  font-weight: 900;
+  font-size: 14px;
   color: #ffe072;
+  padding: 3px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  background: rgba(126, 0, 0, 0.35);
 }
+.rank-badge.r1 { background: rgba(255, 197, 57, 0.35); color: #fff6dc; }
+.rank-badge.r2 { background: rgba(225, 225, 225, 0.28); color: #fff; }
+.rank-badge.r3 { background: rgba(226, 146, 82, 0.3); color: #fff1df; }
 
 .split-grid {
   display: grid;
@@ -160,13 +229,13 @@ tfoot td {
   padding: 8px;
   background: rgba(0,0,0,0.11);
 }
-.chart-box h3 { margin: 4px 0 8px; text-align: center; }
+.chart-box h3 { margin: 4px 0 8px; text-align: center; font-size: 21px; }
 #marketPie { width: 100%; height: auto; display: block; max-width: 340px; margin: 0 auto; }
 .pie-legend {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 6px;
-  font-size: 12px;
+  font-size: 13px;
 }
 .legend-item { display: flex; align-items: center; gap: 6px; }
 .legend-dot { width: 12px; height: 12px; border-radius: 50%; }
@@ -174,10 +243,32 @@ tfoot td {
 .report-date {
   position: fixed;
   left: 16px;
-  bottom: 10px;
-  font-size: 13px;
-  color: rgba(255, 255, 255, 0.9);
+  bottom: 12px;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.92);
+  z-index: 20;
 }
+
+.role-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: rgba(0, 0, 0, 0.55);
+  display: grid;
+  place-items: center;
+  padding: 14px;
+}
+.role-panel {
+  width: min(560px, 96vw);
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,.24);
+  background: linear-gradient(180deg, rgba(129, 0, 0, 0.95), rgba(179, 30, 0, 0.95));
+  padding: 16px;
+  display: grid;
+  gap: 10px;
+}
+.role-panel h3 { margin: 0; font-size: 28px; }
+.role-panel p { margin: 0; color: #ffe3d0; font-size: 14px; }
 
 .admin-page { background: linear-gradient(160deg, #7b0000, #d60900); }
 .login-card,
@@ -189,8 +280,8 @@ input, select, button, textarea {
   border: 1px solid rgba(255, 255, 255, 0.3);
   background: rgba(255, 255, 255, 0.13);
   color: #fff;
-  padding: 9px 10px;
-  font-size: 14px;
+  padding: 10px 12px;
+  font-size: 15px;
 }
 option { color: #111; }
 button { cursor: pointer; font-weight: 700; }
@@ -198,7 +289,7 @@ button:hover { background: rgba(255,255,255,0.21); }
 .back-link { color: #ffd36e; text-decoration: none; font-size: 14px; }
 .hint { color: #ffe3d0; font-size: 13px; margin: 0; }
 .msg { min-height: 20px; margin: 0; color: #ffeea6; }
-.hidden { display: none; }
+.hidden { display: none !important; }
 
 .editor-head {
   display: flex;
@@ -221,8 +312,45 @@ button:hover { background: rgba(255,255,255,0.21); }
 @media (max-width: 1080px) {
   .split-grid { grid-template-columns: 1fr; }
 }
+
 @media (max-width: 760px) {
-  .dashboard-wrap, .admin-wrap { padding: 8px 10px 70px; }
-  .hero { padding: 24px 12px 8px; }
-  .strategy { font-size: 15px; }
+  body { font-size: 18px; }
+  .dashboard-wrap, .admin-wrap { padding: 8px 8px 96px; }
+  .hero { padding: 22px 10px 8px; }
+  .strategy {
+    font-size: 28px;
+    width: 100%;
+    text-align: center;
+    padding: 10px 12px;
+  }
+  .role-badge { font-size: 15px; }
+  .card { padding: 12px; border-radius: 14px; }
+  .card h2 { font-size: 26px; }
+  .sub-title { font-size: 23px; }
+  .podium {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+  .podium-title { font-size: 26px; }
+  .podium-name { font-size: 20px; }
+  th, td {
+    font-size: 16px;
+    padding: 12px 10px;
+  }
+  th { font-size: 17px; }
+  .rank-badge { font-size: 15px; }
+  .chart-box h3 { font-size: 23px; }
+  .pie-legend { font-size: 14px; grid-template-columns: 1fr; }
+  .report-date { font-size: 13px; bottom: 56px; }
+  .bottom-actions {
+    left: 8px;
+    right: 8px;
+    bottom: 8px;
+    justify-content: flex-end;
+  }
+  .role-entry,
+  .admin-entry {
+    font-size: 13px;
+    padding: 8px 12px;
+  }
 }
