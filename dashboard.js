@@ -306,14 +306,10 @@
       closeModal();
     });
 
-    const saved = getSavedRole();
-    if (!saved) {
-      applyRolePermission("market");
-      openModal();
-    } else {
-      applyRolePermission(saved.role);
-      closeModal();
-    }
+    // Always require login on page open.
+    localStorage.removeItem(ROLE_SESSION_KEY);
+    applyRolePermission("market");
+    openModal();
   }
 
   function renderWithData(data) {
@@ -485,7 +481,9 @@
     const result = await fetchDashboardData();
     renderWithData(result.data);
     const saved = getSavedRole();
-    applyRolePermission(saved ? saved.role : "market");
+    if (saved) {
+      applyRolePermission(saved.role);
+    }
   }
 
   initRoleGate();
