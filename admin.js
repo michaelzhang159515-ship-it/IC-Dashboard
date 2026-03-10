@@ -1,5 +1,5 @@
 (function () {
-  const { CAMPUSES, DEFAULT_PASSWORDS, getData, saveData } = window.AIXI;
+  const { CAMPUSES, fetchDashboardData, verifyCampusLogin, saveCampusPayload } = window.AIXI;
 
   const LOGIN_KEY = "aixi_dashboard_admin_session";
 
@@ -104,6 +104,7 @@
   const logoutBtn = document.getElementById("logoutBtn");
 
   let activeCampus = "";
+  let activePassword = "";
   let draftData = null;
 
   function initCampusOptions() {
@@ -237,23 +238,40 @@
     return rows;
   }
 
-  function saveAll() {
-    const latest = getData();
+  function buildPayloadForCampus() {
+    const payload = {};
     sectionDefs.forEach((def) => {
-      const otherCampusRows = (latest[def.key] || []).filter((r) => r.campus !== activeCampus);
-      const currentCampusRows = collectSectionData(def);
-      latest[def.key] = otherCampusRows.concat(currentCampusRows);
+      payload[def.key] = collectSectionData(def);
     });
-    latest.meta = latest.meta || {};
-    latest.meta.lastUpdated = new Date().toISOString().slice(0, 10);
-    saveData(latest);
-    draftData = latest;
+    return payload;
   }
 
-  function showEditor(campus) {
+  async function saveAll() {
+    const payload = buildPayloadForCampus();
+    saveAllBtn.disabled = true;
+    saveAllBtn.textContent = "保存中...";
+    try {
+      const ok = await saveCampusPayload(activeCampus, activePassword, payload);
+      if (!ok) {
+        throw new Error("保存失败");
+      }
+      alert("已保存到云端，所有人页面会自动刷新。\n如无变化，请等待8秒。\n");
+    } catch (err) {
+      alert("保存失败：" + (err.message || err));
+    } finally {
+      saveAllBtn.disabled = false;
+      saveAllBtn.textContent = "保存全部";
+    }
+  }
+
+  async function showEditor(campus, password) {
     activeCampus = campus;
-    localStorage.setItem(LOGIN_KEY, campus);
-    draftData = getData();
+    activePassword = password;
+    localStorage.setItem(LOGIN_KEY, JSON.stringify({ campus: campus, password: password }));
+
+    const result = await fetchDashboardData();
+    draftData = result.data;
+
     loginCard.classList.add("hidden");
     editorCard.classList.remove("hidden");
     editorTitle.textContent = campus + " 教务数据填报";
@@ -262,6 +280,7 @@
 
   function logout() {
     activeCampus = "";
+    activePassword = "";
     localStorage.removeItem(LOGIN_KEY);
     editorCard.classList.add("hidden");
     loginCard.classList.remove("hidden");
@@ -269,33 +288,47 @@
     loginMsg.textContent = "";
   }
 
-  loginBtn.addEventListener("click", () => {
+  loginBtn.addEventListener("click", async () => {
     const campus = campusSelect.value;
     const pw = (passwordInput.value || "").trim();
     if (!campus) {
       loginMsg.textContent = "请选择校区。";
       return;
     }
-    const expected = DEFAULT_PASSWORDS[campus];
-    if (pw !== expected) {
+    if (!pw) {
+      loginMsg.textContent = "请输入密码。";
+      return;
+    }
+
+    loginBtn.disabled = true;
+    loginBtn.textContent = "登录中...";
+    const ok = await verifyCampusLogin(campus, pw);
+    loginBtn.disabled = false;
+    loginBtn.textContent = "登录";
+
+    if (!ok) {
       loginMsg.textContent = "密码错误，请联系总部管理员。";
       return;
     }
     loginMsg.textContent = "";
-    showEditor(campus);
+    await showEditor(campus, pw);
   });
 
-  saveAllBtn.addEventListener("click", () => {
-    saveAll();
-    alert("已保存，主页会自动读取最新数据。");
-  });
-
+  saveAllBtn.addEventListener("click", saveAll);
   logoutBtn.addEventListener("click", logout);
 
   initCampusOptions();
 
-  const sessionCampus = localStorage.getItem(LOGIN_KEY);
-  if (sessionCampus && CAMPUSES.includes(sessionCampus)) {
-    showEditor(sessionCampus);
-  }
+  (async function restoreSession() {
+    const raw = localStorage.getItem(LOGIN_KEY);
+    if (!raw) return;
+    try {
+      const session = JSON.parse(raw);
+      if (session && CAMPUSES.includes(session.campus) && session.password) {
+        await showEditor(session.campus, session.password);
+      }
+    } catch (err) {
+      localStorage.removeItem(LOGIN_KEY);
+    }
+  })();
 })();
