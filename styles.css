@@ -56,18 +56,6 @@ body {
   min-height: auto;
 }
 .hero-inner { width: auto; }
-.hero-horse {
-  width: min(34vw, 420px);
-  opacity: 0.5;
-  filter: drop-shadow(0 0 10px rgba(255, 195, 85, 0.25));
-}
-.hero-horse path {
-  fill: none;
-  stroke: #ffd37d;
-  stroke-width: 14;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
 .year {
   margin: 0;
   font-size: clamp(54px, 9vw, 96px);
@@ -80,6 +68,7 @@ h1 {
   margin: 10px 0 10px;
   font-size: clamp(28px, 4.8vw, 52px);
   line-height: 1.15;
+  white-space: nowrap;
 }
 .strategy {
   display: inline-block;
@@ -93,6 +82,7 @@ h1 {
   border-radius: 999px;
   padding: 8px 20px;
   box-shadow: 0 0 20px rgba(255, 186, 89, 0.35);
+  white-space: nowrap;
 }
 .role-badge {
   margin: 10px 0 0;
@@ -374,12 +364,17 @@ button:hover { background: rgba(255,255,255,0.21); }
   body { font-size: 18px; }
   .dashboard-wrap, .admin-wrap { padding: 8px 8px 96px; }
   .hero { padding: 24px 12px 8px; min-height: auto; gap: 8px; }
-  .hero-horse { width: min(38vw, 180px); opacity: 0.42; }
+  .hero-inner { width: 100%; }
+  h1 {
+    font-size: clamp(18px, 5vw, 24px);
+    line-height: 1.08;
+    white-space: nowrap;
+  }
   .strategy {
-    font-size: 28px;
-    width: 100%;
-    text-align: center;
-    padding: 10px 12px;
+    font-size: clamp(18px, 4.8vw, 22px);
+    width: auto;
+    padding: 8px 12px;
+    white-space: nowrap;
   }
   .role-badge { font-size: 15px; }
   .card { padding: 12px; border-radius: 14px; }
