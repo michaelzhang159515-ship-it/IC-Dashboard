@@ -51,11 +51,12 @@ body {
   padding: 36px 28px 10px;
   text-align: left;
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: flex-start;
   min-height: auto;
 }
 .hero-inner { width: auto; }
+.hero-horse { display: none !important; }
 .year {
   margin: 0;
   font-size: clamp(54px, 9vw, 96px);
