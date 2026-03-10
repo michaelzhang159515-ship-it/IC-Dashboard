@@ -15,7 +15,7 @@
   </svg>
 
   <header class="hero">
-    <div>
+    <div class="hero-inner">
       <p class="year">2026</p>
       <h1>爱习集团战果实时报告</h1>
       <p class="strategy">三年二十校</p>
@@ -40,7 +40,7 @@
         <div id="marketTable"></div>
         <div class="chart-box">
           <h3>全款人数占比</h3>
-          <canvas id="marketPie" width="360" height="360"></canvas>
+          <canvas id="marketPie" width="520" height="520"></canvas>
           <div id="pieLegend" class="pie-legend"></div>
         </div>
       </div>
@@ -64,7 +64,7 @@
     <section class="card" id="sectionTeacher" data-scope="partner,teaching">
       <h2>教师排名</h2>
       <div id="teacherTable"></div>
-      <h3 class="sub-title">教师续课「赢在职场」</h3>
+      <h3 class="sub-title">赢在职场排名</h3>
       <div id="teacherCourseTable"></div>
       <h3 class="sub-title">合伙人达标进度</h3>
       <div id="partnerProgressTable"></div>
@@ -80,8 +80,11 @@
 
   <div class="role-modal hidden" id="roleModal">
     <div class="role-panel">
-      <h3>岗位身份验证</h3>
-      <p>合伙人可查看全部数据；市场部可查看市场/教练/主管；教学部可查看教学/教师/赢在职场。</p>
+      <h3>仪表盘登录</h3>
+      <p>请先登录后查看仪表盘。权限按部门自动控制。</p>
+      <label>用户名
+        <input id="roleUsername" type="text" placeholder="请输入用户名" />
+      </label>
       <label>岗位
         <select id="roleSelect">
           <option value="partner">合伙人（校长/市场总监/教学总监）</option>

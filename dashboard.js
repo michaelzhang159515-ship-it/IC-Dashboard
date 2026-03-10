@@ -10,9 +10,15 @@
 
   const COLORS = ["#ffcf60", "#ff7f66", "#ff5a3a", "#ffb36e", "#ffdca1", "#fce69e", "#f7a76d", "#f06e48"];
   const ROLE_SESSION_KEY = "aixi_dashboard_view_role";
+  const VIEW_USERNAME = "ICENGLISH";
 
   function sum(rows, key) {
     return rows.reduce((acc, row) => acc + (Number(row[key]) || 0), 0);
+  }
+
+  function avg(rows, key) {
+    if (!rows.length) return 0;
+    return sum(rows, key) / rows.length;
   }
 
   function withRank(rows, sortFn) {
@@ -23,6 +29,35 @@
   function titleWithoutYear(title) {
     if (!title) return "爱习集团战果实时报告";
     return String(title).replace(/^2026\s*/, "");
+  }
+
+  function shortCampusName(campus) {
+    return String(campus || "").replace(/校区/g, "");
+  }
+
+  function isYouthCampus(campus) {
+    return String(campus || "").includes("少儿");
+  }
+
+  function buildDepartmentSummaryRows(rows, firstKey, sumKeys, avgKeys) {
+    const youthRows = rows.filter((r) => isYouthCampus(r.campus));
+    const collegeRows = rows.filter((r) => !isYouthCampus(r.campus));
+    const groups = [
+      { label: "大学部汇总", data: collegeRows },
+      { label: "少儿部汇总", data: youthRows },
+      { label: "集团汇总", data: rows }
+    ];
+
+    return groups.map((g) => {
+      const row = { [firstKey]: g.label, rank: "-" };
+      sumKeys.forEach((key) => {
+        row[key] = sum(g.data, key);
+      });
+      avgKeys.forEach((key) => {
+        row[key] = avg(g.data, key);
+      });
+      return row;
+    });
   }
 
   function renderTable(containerId, columns, rows, options) {
@@ -53,8 +88,12 @@
           v = col.formatter(v, row);
         }
         if (col.key === "rank") {
-          const rankClass = v <= 3 ? " r" + v : "";
-          td.innerHTML = '<span class="rank-badge' + rankClass + '">第' + v + "名</span>";
+          if (typeof row[col.key] === "number") {
+            const rankClass = v <= 3 ? " r" + v : "";
+            td.innerHTML = '<span class="rank-badge' + rankClass + '">第' + v + "名</span>";
+          } else {
+            td.textContent = v || "-";
+          }
         } else {
           td.textContent = v;
         }
@@ -63,25 +102,29 @@
       tbody.appendChild(tr);
     });
 
-    const tfoot = document.createElement("tfoot");
-    const ftr = document.createElement("tr");
-    columns.forEach((col, idx) => {
-      const td = document.createElement("td");
-      if (idx === 0) {
-        td.textContent = "汇总";
-      } else if (opt.total && Object.prototype.hasOwnProperty.call(opt.total, col.key)) {
-        const totalVal = opt.total[col.key];
-        td.textContent = typeof col.formatter === "function" ? col.formatter(totalVal) : totalVal;
-      } else {
-        td.textContent = "-";
-      }
-      ftr.appendChild(td);
-    });
-    tfoot.appendChild(ftr);
+    let tfoot = null;
+    if (Array.isArray(opt.summaryRows) && opt.summaryRows.length > 0) {
+      tfoot = document.createElement("tfoot");
+      opt.summaryRows.forEach((summaryRow) => {
+        const tr = document.createElement("tr");
+        columns.forEach((col) => {
+          const td = document.createElement("td");
+          let v = summaryRow[col.key];
+          if (typeof col.formatter === "function") {
+            v = col.formatter(v, summaryRow);
+          }
+          td.textContent = v == null ? "-" : v;
+          tr.appendChild(td);
+        });
+        tfoot.appendChild(tr);
+      });
+    }
 
     table.appendChild(thead);
     table.appendChild(tbody);
-    table.appendChild(tfoot);
+    if (tfoot) {
+      table.appendChild(tfoot);
+    }
 
     wrap.appendChild(table);
     container.innerHTML = "";
@@ -101,7 +144,6 @@
       });
 
     const rankText = { 1: "冠军", 2: "亚军", 3: "季军" };
-    const icons = { 1: "冠", 2: "亚", 3: "季" };
 
     podium.innerHTML = "";
     top3.forEach((item) => {
@@ -110,7 +152,7 @@
       div.innerHTML =
         '<div class="podium-title">' + rankText[item.rank] + "</div>" +
         '<div class="podium-name">' + item.campus + "</div>" +
-        '<div class="stage">' + icons[item.rank] + "</div>";
+        '<div class="stage"><span class="stage-number">' + item.rank + "</span></div>";
       podium.appendChild(div);
     });
   }
@@ -132,7 +174,7 @@
     let start = -Math.PI / 2;
     const cx = canvas.width / 2;
     const cy = canvas.height / 2;
-    const r = Math.min(cx, cy) - 12;
+    const r = Math.min(cx, cy) - 20;
 
     list.forEach((item, i) => {
       const angle = (item.value / total) * Math.PI * 2;
@@ -142,18 +184,34 @@
       ctx.closePath();
       ctx.fillStyle = COLORS[i % COLORS.length];
       ctx.fill();
+
+      const mid = start + angle / 2;
+      const labelR = r * 0.72;
+      const lx = cx + Math.cos(mid) * labelR;
+      const ly = cy + Math.sin(mid) * labelR;
+      const ratio = ((item.value / total) * 100).toFixed(1) + "%";
+      const label = shortCampusName(item.campus) + " " + ratio;
+
+      ctx.save();
+      ctx.fillStyle = "rgba(120,0,0,0.72)";
+      ctx.font = "700 16px sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(label, lx, ly);
+      ctx.restore();
+
       start += angle;
     });
 
     ctx.beginPath();
-    ctx.arc(cx, cy, r * 0.45, 0, Math.PI * 2);
+    ctx.arc(cx, cy, r * 0.33, 0, Math.PI * 2);
     ctx.fillStyle = "rgba(120,0,0,.7)";
     ctx.fill();
 
     ctx.fillStyle = "#fff";
-    ctx.font = "700 15px sans-serif";
+    ctx.font = "700 19px sans-serif";
     ctx.textAlign = "center";
-    ctx.fillText("全款人数", cx, cy - 4);
+    ctx.fillText("全款人数", cx, cy - 8);
     ctx.fillText(String(total), cx, cy + 18);
 
     const legend = document.getElementById("pieLegend");
@@ -163,7 +221,7 @@
       div.className = "legend-item";
       div.innerHTML =
         '<span class="legend-dot" style="background:' + COLORS[i % COLORS.length] + '"></span>' +
-        "<span>" + item.campus + " " + ((item.value / total) * 100).toFixed(1) + "%</span>";
+        "<span>" + shortCampusName(item.campus) + " " + ((item.value / total) * 100).toFixed(1) + "%</span>";
       legend.appendChild(div);
     });
   }
@@ -189,7 +247,8 @@
       const raw = localStorage.getItem(ROLE_SESSION_KEY);
       if (!raw) return null;
       const parsed = JSON.parse(raw);
-      if (!parsed || !parsed.role || !parsed.password) return null;
+      if (!parsed || !parsed.role || !parsed.password || !parsed.username) return null;
+      if (String(parsed.username).toUpperCase() !== VIEW_USERNAME) return null;
       if (!VIEW_PASSWORDS[parsed.role]) return null;
       if (VIEW_PASSWORDS[parsed.role] !== parsed.password) return null;
       return parsed;
@@ -201,6 +260,7 @@
   function initRoleGate() {
     const roleModal = document.getElementById("roleModal");
     const roleEntry = document.getElementById("roleEntry");
+    const roleUsername = document.getElementById("roleUsername");
     const roleSelect = document.getElementById("roleSelect");
     const rolePassword = document.getElementById("rolePassword");
     const roleConfirm = document.getElementById("roleConfirm");
@@ -209,6 +269,7 @@
     function openModal() {
       roleModal.classList.remove("hidden");
       roleMsg.textContent = "";
+      roleUsername.value = "";
       rolePassword.value = "";
     }
 
@@ -219,8 +280,17 @@
     roleEntry.addEventListener("click", openModal);
 
     roleConfirm.addEventListener("click", () => {
+      const username = (roleUsername.value || "").trim().toUpperCase();
       const role = roleSelect.value;
       const password = (rolePassword.value || "").trim();
+      if (!username) {
+        roleMsg.textContent = "请输入用户名。";
+        return;
+      }
+      if (username !== VIEW_USERNAME) {
+        roleMsg.textContent = "用户名错误。";
+        return;
+      }
       if (!password) {
         roleMsg.textContent = "请输入访问密码。";
         return;
@@ -229,7 +299,7 @@
         roleMsg.textContent = "密码错误。";
         return;
       }
-      localStorage.setItem(ROLE_SESSION_KEY, JSON.stringify({ role: role, password: password }));
+      localStorage.setItem(ROLE_SESSION_KEY, JSON.stringify({ role: role, username: username, password: password }));
       applyRolePermission(role);
       closeModal();
     });
@@ -268,11 +338,7 @@
       ],
       campusRows,
       {
-        total: {
-          revenue: sum(campusRows, "revenue"),
-          refund: sum(campusRows, "refund"),
-          net: sum(campusRows, "net")
-        }
+        summaryRows: buildDepartmentSummaryRows(campusRows, "campus", ["revenue", "refund", "net"], [])
       }
     );
 
@@ -291,13 +357,7 @@
       ],
       marketRows,
       {
-        total: {
-          fullPayPeople: sum(marketRows, "fullPayPeople"),
-          fullPayOrders: sum(marketRows, "fullPayOrders"),
-          comboPeople: sum(marketRows, "comboPeople"),
-          comboRate: sum(marketRows, "comboRate") / (marketRows.length || 1),
-          enrollAmount: sum(marketRows, "enrollAmount")
-        }
+        summaryRows: buildDepartmentSummaryRows(marketRows, "campus", ["fullPayPeople", "fullPayOrders", "comboPeople", "enrollAmount"], ["comboRate"])
       }
     );
     renderMarketPie(marketRows);
@@ -316,12 +376,7 @@
       ],
       coachRows,
       {
-        total: {
-          weekPeople: sum(coachRows, "weekPeople"),
-          weekOrders: sum(coachRows, "weekOrders"),
-          totalFullPayPeople: sum(coachRows, "totalFullPayPeople"),
-          totalFullPayOrders: sum(coachRows, "totalFullPayOrders")
-        }
+        summaryRows: buildDepartmentSummaryRows(coachRows, "campus", ["weekPeople", "weekOrders", "totalFullPayPeople", "totalFullPayOrders"], [])
       }
     );
 
@@ -339,12 +394,7 @@
       ],
       supervisorRows,
       {
-        total: {
-          weekPeople: sum(supervisorRows, "weekPeople"),
-          weekOrders: sum(supervisorRows, "weekOrders"),
-          totalFullPayPeople: sum(supervisorRows, "totalFullPayPeople"),
-          totalFullPayOrders: sum(supervisorRows, "totalFullPayOrders")
-        }
+        summaryRows: buildDepartmentSummaryRows(supervisorRows, "campus", ["weekPeople", "weekOrders", "totalFullPayPeople", "totalFullPayOrders"], [])
       }
     );
 
@@ -364,14 +414,7 @@
       ],
       teachingRows,
       {
-        total: {
-          openPeople: sum(teachingRows, "openPeople"),
-          renewalBase: sum(teachingRows, "renewalBase"),
-          fullPayPeople: sum(teachingRows, "fullPayPeople"),
-          winAtWork: sum(teachingRows, "winAtWork"),
-          depositPeople: sum(teachingRows, "depositPeople"),
-          netRenewRate: sum(teachingRows, "netRenewRate") / (teachingRows.length || 1)
-        }
+        summaryRows: buildDepartmentSummaryRows(teachingRows, "campus", ["openPeople", "renewalBase", "fullPayPeople", "winAtWork", "depositPeople"], ["netRenewRate"])
       }
     );
 
@@ -392,14 +435,7 @@
       ],
       teacherRows,
       {
-        total: {
-          openPeople: sum(teacherRows, "openPeople"),
-          retrain: sum(teacherRows, "retrain"),
-          renewalBase: sum(teacherRows, "renewalBase"),
-          fullPayPeople: sum(teacherRows, "fullPayPeople"),
-          netRenewRate: sum(teacherRows, "netRenewRate") / (teacherRows.length || 1),
-          depositPeople: sum(teacherRows, "depositPeople")
-        }
+        summaryRows: buildDepartmentSummaryRows(teacherRows, "campus", ["openPeople", "retrain", "renewalBase", "fullPayPeople", "depositPeople"], ["netRenewRate"])
       }
     );
 
@@ -413,7 +449,9 @@
         { key: "rank", label: "排名" }
       ],
       courseRows,
-      { total: { winAtWork: sum(courseRows, "winAtWork") } }
+      {
+        summaryRows: buildDepartmentSummaryRows(courseRows, "campus", ["winAtWork"], [])
+      }
     );
 
     const progressRows = withRank(data.partnerProgressRows || [], (a, b) => {
@@ -436,11 +474,7 @@
       ],
       progressRows,
       {
-        total: {
-          target: sum(progressRows, "target"),
-          baseline: sum(progressRows, "baseline"),
-          challenge: sum(progressRows, "challenge")
-        }
+        summaryRows: []
       }
     );
   }
