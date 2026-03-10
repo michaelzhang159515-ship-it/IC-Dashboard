@@ -22,17 +22,20 @@
     "成都校区": "cd2026",
     "北京校区": "bj2026",
     "少儿九江校区": "sejj2026",
-    "少儿南昌校区": "senc2026"
+    "少儿南昌校区": "senc2026",
+    "总部": "hq2026"
   };
 
   const VIEW_ROLE_LABELS = {
     partner: "合伙人",
-    coach: "市场部教练"
+    market: "市场部",
+    teaching: "教学部"
   };
 
   const VIEW_PASSWORDS = {
     partner: "partner2026",
-    coach: "coach2026"
+    market: "market2026",
+    teaching: "teaching2026"
   };
 
   const BASE_DATA = {
@@ -114,11 +117,32 @@
       { campus: "北京校区", teacher: "安老师", winAtWork: 12 },
       { campus: "少儿九江校区", teacher: "贝老师", winAtWork: 4 },
       { campus: "少儿南昌校区", teacher: "丁老师", winAtWork: 5 }
+    ],
+    partnerProgressRows: [
+      { campusRole: "赣州校区-市场总监", partner: "韩婷", target: 30, baseline: 24, challenge: 36, progress: "26/30" },
+      { campusRole: "赣州校区-教学总监", partner: "郑薇", target: 28, baseline: 22, challenge: 34, progress: "24/28" },
+      { campusRole: "南昌校区-校长", partner: "王校", target: 36, baseline: 30, challenge: 42, progress: "34/36" },
+      { campusRole: "成都校区-市场总监", partner: "黄宁", target: 32, baseline: 26, challenge: 38, progress: "30/32" },
+      { campusRole: "北京校区-教学总监", partner: "邓超", target: 34, baseline: 28, challenge: 40, progress: "33/34" },
+      { campusRole: "少儿南昌校区-校长", partner: "彭校", target: 22, baseline: 18, challenge: 26, progress: "19/22" },
+      { campusRole: "东北校区-校长", partner: "赵校", target: 24, baseline: 20, challenge: 29, progress: "21/24" },
+      { campusRole: "青镇湖校区-教学总监", partner: "沈岩", target: 25, baseline: 21, challenge: 30, progress: "22/25" }
     ]
   };
 
   function deepClone(v) {
     return JSON.parse(JSON.stringify(v));
+  }
+
+  function mergeRows(baseRows, rawRows, keyFn) {
+    if (!Array.isArray(rawRows)) return deepClone(baseRows);
+    const map = new Map();
+    rawRows.forEach((row) => map.set(keyFn(row), row));
+    baseRows.forEach((row) => {
+      const k = keyFn(row);
+      if (!map.has(k)) map.set(k, row);
+    });
+    return Array.from(map.values());
   }
 
   function migrateData(raw) {
@@ -137,6 +161,16 @@
     if (!data.meta.lastUpdated) {
       data.meta.lastUpdated = BASE_DATA.meta.lastUpdated;
     }
+
+    data.campusPerformance = mergeRows(BASE_DATA.campusPerformance, data.campusPerformance, (r) => r.campus);
+    data.marketRows = mergeRows(BASE_DATA.marketRows, data.marketRows, (r) => r.campus + "|" + r.director);
+    data.coachRows = mergeRows(BASE_DATA.coachRows, data.coachRows, (r) => r.campus + "|" + r.coach);
+    data.supervisorRows = mergeRows(BASE_DATA.supervisorRows, data.supervisorRows, (r) => r.campus + "|" + r.supervisor);
+    data.teachingRows = mergeRows(BASE_DATA.teachingRows, data.teachingRows, (r) => r.campus + "|" + r.director);
+    data.teacherRows = mergeRows(BASE_DATA.teacherRows, data.teacherRows, (r) => r.campus + "|" + r.teacher + "|" + r.className);
+    data.teacherCourseRows = mergeRows(BASE_DATA.teacherCourseRows, data.teacherCourseRows, (r) => r.campus + "|" + r.teacher);
+    data.partnerProgressRows = mergeRows(BASE_DATA.partnerProgressRows, data.partnerProgressRows, (r) => r.campusRole + "|" + r.partner);
+
     return data;
   }
 
@@ -199,6 +233,9 @@
   }
 
   async function verifyCampusLogin(campus, password) {
+    if (campus === "总部") {
+      return password === DEFAULT_PASSWORDS["总部"];
+    }
     try {
       const res = await supabaseRpc("verify_campus_login", {
         p_campus: campus,
@@ -213,6 +250,14 @@
   async function saveCampusPayload(campus, password, payload) {
     const res = await supabaseRpc("save_campus_payload", {
       p_campus: campus,
+      p_password: password,
+      p_payload: payload
+    });
+    return !!res;
+  }
+
+  async function saveFullPayload(password, payload) {
+    const res = await supabaseRpc("save_full_payload", {
       p_password: password,
       p_payload: payload
     });
@@ -254,6 +299,7 @@
     fetchDashboardData,
     verifyCampusLogin,
     saveCampusPayload,
+    saveFullPayload,
     toCurrency,
     toPercent,
     toDateLabel,

@@ -101,7 +101,7 @@
       });
 
     const rankText = { 1: "冠军", 2: "亚军", 3: "季军" };
-    const icons = { 1: "👑", 2: "✦", 3: "✦" };
+    const icons = { 1: "冠", 2: "亚", 3: "季" };
 
     podium.innerHTML = "";
     top3.forEach((item) => {
@@ -175,8 +175,11 @@
     }
 
     document.querySelectorAll("[data-scope]").forEach((sec) => {
-      const scope = sec.getAttribute("data-scope");
-      const canView = role === "partner" ? true : scope === "coach";
+      const scopes = String(sec.getAttribute("data-scope") || "")
+        .split(",")
+        .map((v) => v.trim())
+        .filter(Boolean);
+      const canView = scopes.includes(role);
       sec.classList.toggle("hidden", !canView);
     });
   }
@@ -233,7 +236,7 @@
 
     const saved = getSavedRole();
     if (!saved) {
-      applyRolePermission("coach");
+      applyRolePermission("market");
       openModal();
     } else {
       applyRolePermission(saved.role);
@@ -412,13 +415,41 @@
       courseRows,
       { total: { winAtWork: sum(courseRows, "winAtWork") } }
     );
+
+    const progressRows = withRank(data.partnerProgressRows || [], (a, b) => {
+      const pa = String(a.progress || "0/1").split("/");
+      const pb = String(b.progress || "0/1").split("/");
+      const ra = (Number(pa[0]) || 0) / ((Number(pa[1]) || 1));
+      const rb = (Number(pb[0]) || 0) / ((Number(pb[1]) || 1));
+      return rb - ra;
+    });
+    renderTable(
+      "partnerProgressTable",
+      [
+        { key: "campusRole", label: "校区岗位" },
+        { key: "partner", label: "合伙人" },
+        { key: "target", label: "目标" },
+        { key: "baseline", label: "保底" },
+        { key: "challenge", label: "挑战" },
+        { key: "progress", label: "进度" },
+        { key: "rank", label: "排名" }
+      ],
+      progressRows,
+      {
+        total: {
+          target: sum(progressRows, "target"),
+          baseline: sum(progressRows, "baseline"),
+          challenge: sum(progressRows, "challenge")
+        }
+      }
+    );
   }
 
   async function render() {
     const result = await fetchDashboardData();
     renderWithData(result.data);
     const saved = getSavedRole();
-    applyRolePermission(saved ? saved.role : "coach");
+    applyRolePermission(saved ? saved.role : "market");
   }
 
   initRoleGate();

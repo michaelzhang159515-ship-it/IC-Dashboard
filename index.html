@@ -24,17 +24,17 @@
   </header>
 
   <main class="dashboard-wrap">
-    <section class="card podium-card" id="sectionPodium" data-scope="all">
-      <h2>荣耀王者校区殿堂</h2>
+    <section class="card podium-card" id="sectionPodium" data-scope="partner">
+      <h2>最高的山</h2>
       <div id="podium" class="podium"></div>
     </section>
 
-    <section class="card" id="sectionCampus" data-scope="all">
+    <section class="card" id="sectionCampus" data-scope="partner">
       <h2>校区排名</h2>
       <div id="campusTable"></div>
     </section>
 
-    <section class="card" id="sectionMarket" data-scope="coach">
+    <section class="card" id="sectionMarket" data-scope="partner,market">
       <h2>市场部排名</h2>
       <div class="split-grid">
         <div id="marketTable"></div>
@@ -46,26 +46,28 @@
       </div>
     </section>
 
-    <section class="card" id="sectionCoach" data-scope="coach">
+    <section class="card" id="sectionCoach" data-scope="partner,market">
       <h2>教练排名</h2>
       <div id="coachTable"></div>
     </section>
 
-    <section class="card" id="sectionSupervisor" data-scope="coach">
+    <section class="card" id="sectionSupervisor" data-scope="partner,market">
       <h2>主管排名</h2>
       <div id="supervisorTable"></div>
     </section>
 
-    <section class="card" id="sectionTeaching" data-scope="all">
+    <section class="card" id="sectionTeaching" data-scope="partner,teaching">
       <h2>教学部排名</h2>
       <div id="teachingTable"></div>
     </section>
 
-    <section class="card" id="sectionTeacher" data-scope="all">
+    <section class="card" id="sectionTeacher" data-scope="partner,teaching">
       <h2>教师排名</h2>
       <div id="teacherTable"></div>
       <h3 class="sub-title">教师续课「赢在职场」</h3>
       <div id="teacherCourseTable"></div>
+      <h3 class="sub-title">合伙人达标进度</h3>
+      <div id="partnerProgressTable"></div>
     </section>
   </main>
 
@@ -79,11 +81,12 @@
   <div class="role-modal hidden" id="roleModal">
     <div class="role-panel">
       <h3>岗位身份验证</h3>
-      <p>合伙人可查看全部数据；市场部教练仅查看市场/教练/主管板块。</p>
+      <p>合伙人可查看全部数据；市场部可查看市场/教练/主管；教学部可查看教学/教师/赢在职场。</p>
       <label>岗位
         <select id="roleSelect">
           <option value="partner">合伙人（校长/市场总监/教学总监）</option>
-          <option value="coach">市场部教练</option>
+          <option value="market">市场部</option>
+          <option value="teaching">教学部</option>
         </select>
       </label>
       <label>访问密码

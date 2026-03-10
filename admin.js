@@ -1,5 +1,5 @@
 (function () {
-  const { CAMPUSES, fetchDashboardData, verifyCampusLogin, saveCampusPayload } = window.AIXI;
+  const { CAMPUSES, fetchDashboardData, verifyCampusLogin, saveCampusPayload, saveFullPayload } = window.AIXI;
 
   const LOGIN_KEY = "aixi_dashboard_admin_session";
 
@@ -89,6 +89,18 @@
         { key: "teacher", label: "教师", type: "text" },
         { key: "winAtWork", label: "赢在职场", type: "number" }
       ]
+    },
+    {
+      key: "partnerProgressRows",
+      title: "合伙人达标进度",
+      columns: [
+        { key: "campusRole", label: "校区岗位", type: "text" },
+        { key: "partner", label: "合伙人", type: "text" },
+        { key: "target", label: "目标", type: "number" },
+        { key: "baseline", label: "保底", type: "number" },
+        { key: "challenge", label: "挑战", type: "number" },
+        { key: "progress", label: "进度", type: "text" }
+      ]
     }
   ];
 
@@ -107,8 +119,13 @@
   let activePassword = "";
   let draftData = null;
 
+  const ADMIN_CAMPUSES = CAMPUSES.concat(["总部"]);
+  function isHeadquarters() {
+    return activeCampus === "总部";
+  }
+
   function initCampusOptions() {
-    campusSelect.innerHTML = CAMPUSES.map((c) => '<option value="' + c + '">' + c + "</option>").join("");
+    campusSelect.innerHTML = ADMIN_CAMPUSES.map((c) => '<option value="' + c + '">' + c + "</option>").join("");
   }
 
   function parseInputValue(type, value) {
@@ -127,8 +144,10 @@
     title.textContent = sectionDef.title;
     wrapper.appendChild(title);
 
-    const list = sourceRows.filter((r) => r.campus === activeCampus);
-    if (sectionDef.singleRow && list.length === 0) {
+    const list = isHeadquarters()
+      ? sourceRows.slice()
+      : sourceRows.filter((r) => r.campus === activeCampus);
+    if (!isHeadquarters() && sectionDef.singleRow && list.length === 0) {
       list.push({ campus: activeCampus });
     }
 
@@ -169,6 +188,9 @@
       addBtn.textContent = "新增一行";
       addBtn.addEventListener("click", () => {
         const emptyRow = { campus: activeCampus };
+        if (isHeadquarters()) {
+          emptyRow.campus = CAMPUSES[0];
+        }
         sectionDef.columns.forEach((col) => {
           if (!Object.prototype.hasOwnProperty.call(emptyRow, col.key)) {
             emptyRow[col.key] = col.type === "number" ? 0 : "";
@@ -193,7 +215,7 @@
       input.value = row[col.key] == null ? "" : row[col.key];
       input.dataset.key = col.key;
       if (col.readonly) {
-        input.readOnly = true;
+        input.readOnly = col.key === "campus" ? !isHeadquarters() : true;
       }
       td.appendChild(input);
       tr.appendChild(td);
@@ -231,7 +253,12 @@
         item[col.key] = parseInputValue(col.type, input ? input.value : "");
       });
       if (sectionDef.singleRow || Object.values(item).some((v) => String(v).trim() !== "")) {
-        item.campus = activeCampus;
+        if (!isHeadquarters() && sectionDef.columns.some((c) => c.key === "campus")) {
+          item.campus = activeCampus;
+        }
+        if (isHeadquarters() && sectionDef.columns.some((c) => c.key === "campus")) {
+          item.campus = item.campus || CAMPUSES[0];
+        }
         rows.push(item);
       }
     });
@@ -251,7 +278,9 @@
     saveAllBtn.disabled = true;
     saveAllBtn.textContent = "保存中...";
     try {
-      const ok = await saveCampusPayload(activeCampus, activePassword, payload);
+      const ok = isHeadquarters()
+        ? await saveFullPayload(activePassword, payload)
+        : await saveCampusPayload(activeCampus, activePassword, payload);
       if (!ok) {
         throw new Error("保存失败");
       }
@@ -324,7 +353,7 @@
     if (!raw) return;
     try {
       const session = JSON.parse(raw);
-      if (session && CAMPUSES.includes(session.campus) && session.password) {
+      if (session && ADMIN_CAMPUSES.includes(session.campus) && session.password) {
         await showEditor(session.campus, session.password);
       }
     } catch (err) {
