@@ -267,6 +267,7 @@
     const roleMsg = document.getElementById("roleMsg");
 
     function openModal() {
+      document.body.classList.add("logged-out");
       roleModal.classList.remove("hidden");
       roleMsg.textContent = "";
       roleUsername.value = "";
@@ -274,6 +275,7 @@
     }
 
     function closeModal() {
+      document.body.classList.remove("logged-out");
       roleModal.classList.add("hidden");
     }
 

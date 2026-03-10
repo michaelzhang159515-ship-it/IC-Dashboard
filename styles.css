@@ -49,7 +49,11 @@ body {
 
 .hero {
   padding: 32px 28px 12px;
+  text-align: center;
+  display: flex;
+  justify-content: center;
 }
+.hero-inner { width: 100%; }
 .year {
   margin: 0;
   font-size: clamp(54px, 9vw, 96px);
@@ -181,6 +185,16 @@ h1 {
   min-height: 135px;
   background: linear-gradient(180deg, rgba(255, 193, 144, 0.52), rgba(185, 98, 32, 0.3));
 }
+.stage-number {
+  font-family: "Times New Roman", "Georgia", serif;
+  font-style: italic;
+  font-weight: 900;
+  font-size: clamp(72px, 10vw, 128px);
+  line-height: 0.9;
+  color: rgba(255, 255, 255, 0.92);
+  text-shadow: 0 8px 10px rgba(116, 0, 0, 0.34);
+  transform: skewX(-10deg);
+}
 
 .table-wrap { overflow-x: auto; }
 table {
@@ -221,7 +235,7 @@ tfoot td {
 
 .split-grid {
   display: grid;
-  grid-template-columns: 1fr 360px;
+  grid-template-columns: 1fr 470px;
   gap: 14px;
 }
 .chart-box {
@@ -231,7 +245,7 @@ tfoot td {
   background: rgba(0,0,0,0.11);
 }
 .chart-box h3 { margin: 4px 0 8px; text-align: center; font-size: 21px; }
-#marketPie { width: 100%; height: auto; display: block; max-width: 340px; margin: 0 auto; }
+#marketPie { width: 100%; height: auto; display: block; max-width: 450px; margin: 0 auto; }
 .pie-legend {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -254,7 +268,7 @@ tfoot td {
   position: fixed;
   inset: 0;
   z-index: 60;
-  background: rgba(0, 0, 0, 0.55);
+  background: #ffffff;
   display: grid;
   place-items: center;
   padding: 14px;
@@ -262,14 +276,36 @@ tfoot td {
 .role-panel {
   width: min(560px, 96vw);
   border-radius: 16px;
-  border: 1px solid rgba(255,255,255,.24);
-  background: linear-gradient(180deg, rgba(129, 0, 0, 0.95), rgba(179, 30, 0, 0.95));
+  border: 1px solid rgba(0,0,0,.12);
+  background: #ffffff;
   padding: 16px;
   display: grid;
   gap: 10px;
+  color: #222;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.12);
 }
-.role-panel h3 { margin: 0; font-size: 28px; }
-.role-panel p { margin: 0; color: #ffe3d0; font-size: 14px; }
+.role-panel h3 { margin: 0; font-size: 28px; color: #b00000; }
+.role-panel p { margin: 0; color: #555; font-size: 14px; }
+.role-panel label { color: #222; font-size: 14px; }
+.role-panel input,
+.role-panel select {
+  color: #222;
+  background: #fff;
+  border: 1px solid #d9d9d9;
+}
+.role-panel button {
+  background: #c90000;
+  color: #fff;
+  border: 1px solid #c90000;
+}
+.role-panel button:hover { background: #a80000; }
+
+.logged-out .hero,
+.logged-out .dashboard-wrap,
+.logged-out .report-date,
+.logged-out .bottom-actions {
+  display: none;
+}
 
 .admin-page { background: linear-gradient(160deg, #7b0000, #d60900); }
 .login-card,
